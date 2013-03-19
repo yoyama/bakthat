@@ -368,7 +368,6 @@ def configure(profile="default"):
     new_conf = config.copy()
     new_conf[profile] = config.get(profile, {})
 
-    new_conf_file = open(CONFIG_FILE, "w")
 
     new_conf[profile]["access_key"] = raw_input("AWS Access Key: ")
     new_conf[profile]["secret_key"] = raw_input("AWS Secret Key: ")
@@ -393,7 +392,9 @@ def configure(profile="default"):
         region_name = DEFAULT_LOCATION
     new_conf[profile]["region_name"] = region_name
 
-    yaml.dump(new_conf, new_conf_file, default_flow_style=False)
+    with tempfile.NamedTemporaryFile(delete=False) as new_config_file:
+        yaml.dump(new_conf, new_config_file, default_flow_style=False)
+        os.rename(new_config_file.name, CONFIG_FILE)
 
     log.info("Config written in %s" % CONFIG_FILE)
     log.info("Run bakthat configure_backups_rotation if needed.")
